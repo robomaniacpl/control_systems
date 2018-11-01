@@ -8,6 +8,7 @@
 #include <stdbool.h>
 
 #include "double_setpoint_controller.h"
+#include "matlab/valves.h"
 
 float pressure_actual = 0;
 bool pressure_up = false;
@@ -40,10 +41,11 @@ void valve_control_loop(int printing_format)
     else if(printing_format == 3)
         printf("Time, Control\n");
 
+
     float pressure_demand = 2;
     pressure_actual = 0;
     float error = 100;
-    int control;
+    int control = 0;
     float time;
     float dtime = 0.01;
     float timeEnd = 20;
@@ -83,28 +85,37 @@ void valve_control_loop(int printing_format)
 
 void gripper(float control)
 {
-    if(control == 1)
-    {
-        valve_tank(1);
-        valve_ambient(0);
-    }
-    else if (control == -1)
-    {
-        valve_tank(0);
-        valve_ambient(1);
-    }
-
-    if(pressure_up)
-        pressure_actual+=pressure_step;
-    else
-        pressure_actual-=pressure_step;
+    // if(control == 1)
+    // {
+    //     valve_tank(1);
+    //     valve_ambient(0);
+    // }
+    // else if (control == -1)
+    // {
+    //     valve_tank(0);
+    //     valve_ambient(1);
+    // }
+    // else
+    // {
+    //     valve_tank(0);
+    //     valve_ambient(0);
+    // }
+    rtU.control = control;
+    valves_step();
+    pressure_actual = rtY.actual_pressure;
+    // if(pressure_up)
+    //     pressure_actual+=pressure_step;
+    // else
+    //     pressure_actual-=pressure_step;
 }
 
 void valve_tank(int is_on){
     if(is_on)
-        pressure_up = true;
+        // pressure_up = true;
+        pressure_actual+=pressure_step;
 }
 void valve_ambient(int is_on){
     if(is_on)
-        pressure_up = false;
+        // pressure_up = false;
+        pressure_actual-=pressure_step;
 }
